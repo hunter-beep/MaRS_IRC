@@ -1,47 +1,68 @@
 #include <Arduino.h>
 
+
+//Follow the below mentioned convention
+//Make sure if you press A, the wheel goes clockwise with respect to the front of the motor
+//When high is to the direction pin, B gets the signal.
+//The above point was found out experimentally
+
+
+
+
+//Function declaration
+
+
 void forward();
 void backward();
 void spotleft();
 void spotright();
 
+
 //Motor Drivers Pin Declaration
+
 
 //front left
 #define dir_fl PC15    
 #define pwm_fl PA0
 
+
 //front right
 #define dir_fr PB9
 #define pwm_fr PB8
 
-//back left--
+
+//back left
 #define dir_bl PA5
 #define pwm_bl PA6
+
 
 //back right
 #define dir_br PB15
 #define pwm_br PB14
+
 
 //choice
 int choice;
 int input_pwm;
 
 
+
+
 //class declration of motor
 class motor
 {
   private:
-  
+ 
     int dir_pin;
     int pwm_pin;
-  
+ 
   public:
     motor(int pin1,int pin2);
     void clockwise();
     void anticlockwise();
     void pwm(int input_pwm);
 };
+
 
 motor::motor(int pin1,int pin2)
 {
@@ -51,15 +72,18 @@ motor::motor(int pin1,int pin2)
   pinMode(pwm_pin,OUTPUT);
 }
 
+
 void motor::clockwise() // Viewing the rover form the right side with respect to front of the rover
+{
+  digitalWrite(dir_pin,LOW); /// WE DON'T KNOW WHY IT IS LOW {dir pin HIGH means B in the motor Driver is getting the signal}
+}
+
+
+void motor::anticlockwise()
 {
   digitalWrite(dir_pin,HIGH);
 }
 
-void motor::anticlockwise()
-{
-  digitalWrite(dir_pin,LOW);
-}
 
 void motor::pwm(int input_pwm)
 {
@@ -72,21 +96,25 @@ motor motorFR(dir_fr,pwm_fr);
 motor motorBR(dir_br,pwm_br);
 motor motorBL(dir_bl,pwm_bl);
 
+
 void setup()
 {
   Serial.begin(9600);
 }
 
+
 void loop()
 {
-  Serial.print("Enter pwm: ");
+  Serial.println("Enter pwm: ");
   while(Serial.available()==0);
   input_pwm = Serial.parseInt();
   input_pwm = constrain(input_pwm,0,255);
 
+
   Serial.println("Enter choice: ");
   while(Serial.available()==0);
   choice = Serial.parseInt();
+
 
   switch (choice)
   {
@@ -106,45 +134,53 @@ void loop()
       input_pwm = 0;
   }
 
+
   motorFR.pwm(input_pwm);
   motorBR.pwm(input_pwm);
   motorFL.pwm(input_pwm);
   motorBL.pwm(input_pwm);
-
 }
 
-void forward()     
+
+void backward()    
+{
+  motorFR.anticlockwise();
+  motorBR.anticlockwise();
+
+
+  motorFL.clockwise();
+  motorBL.clockwise();
+}
+
+
+void forward()
 {
   motorFR.clockwise();
   motorBR.clockwise();
+
 
   motorFL.anticlockwise();
   motorBL.anticlockwise();
 }
 
-void backward()
-{
-  motorFR.anticlockwise();
-  motorBR.anticlockwise();
-
-  motorFL.clockwise();
-  motorBL.clockwise();
-}
 
 void spotleft()
 {
   motorFR.clockwise();
   motorBR.clockwise();
 
-  motorFL.anticlockwise();
-  motorBL.anticlockwise();
+
+  motorFL.clockwise();
+  motorBL.clockwise();
 }
+
 
 void spotright()
 {
   motorFR.anticlockwise();
   motorBR.anticlockwise();
 
-  motorFL.clockwise();
-  motorBL.clockwise();
+
+  motorFL.anticlockwise();
+  motorBL.anticlockwise();
 }
