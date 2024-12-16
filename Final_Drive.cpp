@@ -48,7 +48,7 @@ int input_pwm;
 
 
 
-//class declration of motor
+//class declaration of motor
 class motor
 {
   private:
