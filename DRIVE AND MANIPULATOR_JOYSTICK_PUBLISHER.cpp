@@ -3,8 +3,8 @@
 #include "sensor_msgs/Joy.h"
 
 
-int drive_speed = 100; 
-int manipulator_pwm = 100;
+int drive_speed = 0; 
+int manipulator_pwm = 0;
 int drive_direction = 0; 
 int manipulator_choice = 0;
 
@@ -36,8 +36,11 @@ public:
 
        // Drive control
      //start button-increase drive's pwm and select button is decrease
-       if (msg->buttons[0] == 1) { 
-           drive_direction = 2;
+       if(msg->buttons[12] == 1){
+        drive_direction = 0;
+        ROS_INFO("Rover: Stop");}
+       else if (msg->buttons[0] == 1) { 
+           drive_direction = 2; 
            ROS_INFO("Drive: Backward");
        } else if (msg->buttons[4] == 1) { 
            drive_direction = 1;
@@ -49,10 +52,10 @@ public:
            drive_direction = 3;
            ROS_INFO("Drive: Left");
        } else if (msg->buttons[10] == 1) { 
-           drive_speed = std::max(drive_speed - 10, 0);
+           drive_speed = std::max(drive_speed - 5, 0);
            ROS_INFO("Drive: Decrease Speed: %d", drive_speed);
        } else if (msg->buttons[11] == 1) { 
-           drive_speed = std::min(drive_speed + 10, 255);
+           drive_speed = std::min(drive_speed + 5, 255);
            ROS_INFO("Drive: Increase Speed: %d", drive_speed);
        }
 
@@ -67,37 +70,51 @@ public:
        }
 
 
-       // stop for manipulator // Home button
-       if (msg->buttons[12] == 1) {
+       if (msg->axes[0] == 0 && msg->axes[1] == 0 && msg->axes[2] == 0 && msg->axes[3] == 0 && msg->axes[6] == 0 && msg->axes[7] == 0) {
            manipulator_choice = 0;
-           ROS_INFO("Manipulator: Stop");
        } else {
            // Manipulator control
          //3,2 are right side knob and 1,0 are left
-           if (msg->axes[3] == +1) { 
+           if (msg->axes[1] == +1) { 
                manipulator_choice = 1;
-               ROS_INFO("Manipulator: Link1 Forward");
-           } else if (msg->axes[3] ==-1) { 
+               ROS_INFO("Manipulator: LA1 Forward");
+           } else if (msg->axes[1] ==-1) { 
                manipulator_choice = 2;
-               ROS_INFO("Manipulator: Link1 Backward");
-           } else if (msg->axes[1] == +1) {
+               ROS_INFO("Manipulator: LA1 Backward");
+           } else if (msg->axes[3] == +1) {
                manipulator_choice = 3;
-               ROS_INFO("Manipulator: Link2 Forward");
-           } else if (msg->axes[1] ==-1) {
+               ROS_INFO("Manipulator: LA2 Forward");
+           } else if (msg->axes[3] ==-1) {
                manipulator_choice = 4;
-               ROS_INFO("Manipulator: Link2 Backward");
+               ROS_INFO("Manipulator: LA2 Backward");
            } else if (msg->axes[2] == +1) {
                manipulator_choice = 5;
-               ROS_INFO("Manipulator: Clockwise");
+               ROS_INFO("Manipulator: Belt Clockwise");
            } else if (msg->axes[2] ==-1) {
                manipulator_choice = 6;
-               ROS_INFO("Manipulator: Anti-Clockwise");
-           } else if (msg->axes[0] == +1) {
+               ROS_INFO("Manipulator: Belt Anti-Clockwise");                                    
+           } else if (msg->axes[0] == -1) {
                manipulator_choice = 7;
                ROS_INFO("Manipulator: Base Clockwise");
-           } else if (msg->axes[0] ==-1) {
+           } else if (msg->axes[0] ==+1) {
                manipulator_choice = 8;
-               ROS_INFO("Manipulator: Base Anti-Clockwise");
+               ROS_INFO("Manipulator: Base Anti-Clockwise"); 
+           }
+            else if(msg->axes[6]== +1){
+            manipulator_choice = 9;
+            ROS_INFO("Manipulator: Bevel_gear Clockwise");
+           }
+           else if(msg->axes[6]== -1){
+            manipulator_choice = 10;
+            ROS_INFO("Manipulator: Bevel_gear Anti-Clockwise");
+           }
+           else if(msg->axes[7]== +1){
+            manipulator_choice = 11;
+            ROS_INFO("Manipulator: Gripper Clockwise");
+           }
+           else if(msg->axes[7]== -1){      
+            manipulator_choice = 12;
+            ROS_INFO("Manipulator: Gripper Anti-Clockwise");
            }
        }
        // publish drive msgs
