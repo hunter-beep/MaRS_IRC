@@ -36,6 +36,9 @@ public:
     void pwm(int input_pwm);
 };
 
+
+
+
 motor::motor(int pin1, int pin2) {
     dir_pin = pin1;
     pwm_pin = pin2;
@@ -79,6 +82,7 @@ void backward() {
     motorBL.clockwise();
 }
 
+
 void spotleft() {
     motorFR.clockwise();
     motorBR.clockwise();
@@ -110,31 +114,28 @@ void choiceCallback(const std_msgs::Int16 &msg) {
         case 4:
             spotright();
             break;
-        default:
+        case 0:
             input_pwm = 0;
     }
-
-    // Apply PWM after processing choice
+        // Apply updated PWM
     motorFR.pwm(input_pwm);
     motorBR.pwm(input_pwm);
     motorFL.pwm(input_pwm);
     motorBL.pwm(input_pwm);
 }
+
+
+
 
 // Callback for PWM topic
 void pwmCallback(const std_msgs::Int16 &msg) {
     input_pwm = constrain(msg.data, 0, 255);
-
-    // Apply updated PWM
-    motorFR.pwm(input_pwm);
-    motorBR.pwm(input_pwm);
-    motorFL.pwm(input_pwm);
-    motorBL.pwm(input_pwm);
 }
 
+
 // ROS Subscribers
-ros::Subscriber<std_msgs::Int16> choice_sub("/rover/choice", &choiceCallback);
 ros::Subscriber<std_msgs::Int16> pwm_sub("/rover/pwm", &pwmCallback);
+ros::Subscriber<std_msgs::Int16> choice_sub("/rover/choice", &choiceCallback);
 
 void setup() {
     Serial.begin(9600);
